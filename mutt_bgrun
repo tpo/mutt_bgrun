@@ -82,7 +82,7 @@ help() {
 	     To use chromium to view URLs from pine, add the
 	     following lines to ~/.mailcap.
 	
-	       text/html; mutt_bgrun --no-file bromium %s
+	       text/html; mutt_bgrun --no-file chromium %s
 	
 	EOHELP
   exit 1
