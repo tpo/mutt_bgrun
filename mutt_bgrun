@@ -34,6 +34,7 @@ help() {
 	SYNOPSIS
 	     mutt_bgrun viewer [viewer options] file
 	     mutt_bgrun --no-file viewer [viewer options] parameter
+	     mutt_bgrun --help
 	
 	DESCRIPTION
 	     Using `mutt_bgrun viewer [viewer options] file`:
@@ -74,14 +75,14 @@ help() {
 	     To use qvpview to view MS Office attachments from mutt, add the
 	     following lines to mutt's mailcap file.
 	
-	     application/msword;             mutt_bgrun qvpview %s
-	     application/vnd.ms-excel;       mutt_bgrun qvpview %s
-	     application/vnd.ms-powerpoint;  mutt_bgrun qvpview %s
+	       application/msword;             mutt_bgrun qvpview %s
+	       application/vnd.ms-excel;       mutt_bgrun qvpview %s
+	       application/vnd.ms-powerpoint;  mutt_bgrun qvpview %s
 	
 	     To use chromium to view URLs from pine, add the
 	     following lines to ~/.mailcap.
 	
-	     text/html; mutt_bgrun --no-file bromium %s
+	       text/html; mutt_bgrun --no-file bromium %s
 	
 	EOHELP
   exit 1
