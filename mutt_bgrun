@@ -1,7 +1,8 @@
-#!/bin/sh
+#!/bin/bash
 # @(#) mutt_bgrun $Revision: 1.5 $
 
-#   mutt_bgrun - run an attachment viewer from mutt in the background
+#   mutt_bgrun - run an attachment viewer from mutt or [al]pine in the
+#   background
 #   Copyright (C) 1999-2002 Gary A. Johnson
 #
 #   This program is free software; you can redistribute it and/or modify
@@ -76,26 +77,29 @@ then
     exit 1
 fi
 
-# Separate the arguments.  Assume the first is the viewer, the last is
-# the file, and all in between are options to the viewer.
+# Separate the arguments.
+
+# Assume the first is the viewer
 
 viewer="$1"
-shift
 
-while [ "$#" -gt "1" ]
-do
-    options="$options $1"
-    shift
-done
+# The last parameter is the file
 
-file="$1"
+file="${@: -1}"
+
+# Remove last argument from parameters
+# courtesy of starfry at http://stackoverflow.com/a/26163980
+#
+# These are assumed to be options for the viewer
+#
+set -- "${@:1:$(($#-1))}"
 
 # Create a temporary directory for our copy of the temporary file.
 #
 # This is more secure than creating a temporary file in an existing
 # directory.
 
-tmpdir=/tmp/$LOGNAME$$
+tmpdir="/tmp/$LOGNAME$$"
 umask 077
 mkdir "$tmpdir" || exit 1
 tmpfile="$tmpdir/${file##*/}"
@@ -108,7 +112,7 @@ cp "$file" "$tmpfile"
 # Run the viewer in the background and delete the temporary files when done. 
 
 (
-    "$viewer" $options "$tmpfile"
+    "$viewer" "$@" "$tmpfile"
     rm -f "$tmpfile"
     rmdir "$tmpdir"
 ) &
