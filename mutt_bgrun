@@ -18,58 +18,6 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
-# SYNOPSIS
-#      mutt_bgrun viewer [viewer options] file
-#      mutt_bgrun --no-file viewer [viewer options] parameter
-#
-# DESCRIPTION
-#      Using mutt_bgrun viewer [viewer options] file:
-#
-#         Mutt invokes external attachment viewers by writing the
-#         attachment to a temporary file, executing the pipeline specified
-#         for that attachment type in the mailcap file, waiting for the
-#         pipeline to terminate, writing nulls over the temporary file,
-#         then deleting it.  This causes problems when using graphical
-#         viewers such as qvpview and acroread to view attachments. 
-#
-#         If qvpview, for example, is executed in the foreground, the mutt
-#         user interface is hung until qvpview exits, so the user can't do
-#         anything else with mutt until he or she finishes reading the
-#         attachment and exits qvpview.  This is especially annoying when
-#         a message contains several MS Office attachments--one would like
-#         to have them all open at once. 
-#
-#         If qvpview is executed in the background, it must be given
-#         enough time to completely read the file before returning control
-#         to mutt, since mutt will then obliterate the file.  Qvpview is
-#         so slow that this time can exceed 20 seconds, and the bound is
-#         unknown.  So this is again annoying. 
-#
-#         The solution provided here is to invoke the specified viewer
-#         from this script after first copying mutt's temporary file to
-#         another temporary file.  This script can then quickly return
-#         control to mutt while the viewer can take as much time as it
-#         needs to read and render the attachment. 
-#
-#      Using mutt_bgrun --no-file viewer [viewer options] parameter
-#
-#         When used with [al]pine, then [al]pine will execute hyperlinks
-#         with the URL as an argument. That argument should therefore not
-#         be interpreted as a file but given to the viewer as is.
-#
-# EXAMPLE
-#      To use qvpview to view MS Office attachments from mutt, add the
-#      following lines to mutt's mailcap file.
-#
-#      application/msword;             mutt_bgrun qvpview %s
-#      application/vnd.ms-excel;       mutt_bgrun qvpview %s
-#      application/vnd.ms-powerpoint;  mutt_bgrun qvpview %s
-#
-#      To use chromium to view URLs from pine, add the
-#      following lines to ~/.mailcap.
-#
-#      text/html; mutt_bgrun --no-file bromium %s
 #
 # AUTHOR
 #      Gary A. Johnson
@@ -81,15 +29,67 @@
 #      GRIMLEY EVANS <edmundo@rano.org> and Andreas Somogyi
 #      <aso@somogyi.nu>.
 
-prog=${0##*/}
+help() {
+  cat <<-'EOHELP' >&2
+	SYNOPSIS
+	     mutt_bgrun viewer [viewer options] file
+	     mutt_bgrun --no-file viewer [viewer options] parameter
+	
+	DESCRIPTION
+	     Using `mutt_bgrun viewer [viewer options] file`:
+	
+	        Mutt invokes external attachment viewers by writing the
+	        attachment to a temporary file, executing the pipeline specified
+	        for that attachment type in the mailcap file, waiting for the
+	        pipeline to terminate, writing nulls over the temporary file,
+	        then deleting it.  This causes problems when using graphical
+	        viewers such as qvpview and acroread to view attachments. 
+	
+	        If qvpview, for example, is executed in the foreground, the mutt
+	        user interface is hung until qvpview exits, so the user can't do
+	        anything else with mutt until he or she finishes reading the
+	        attachment and exits qvpview.  This is especially annoying when
+	        a message contains several MS Office attachments--one would like
+	        to have them all open at once. 
+	
+	        If qvpview is executed in the background, it must be given
+	        enough time to completely read the file before returning control
+	        to mutt, since mutt will then obliterate the file.  Qvpview is
+	        so slow that this time can exceed 20 seconds, and the bound is
+	        unknown.  So this is again annoying. 
+	
+	        The solution provided here is to invoke the specified viewer
+	        from this script after first copying mutt's temporary file to
+	        another temporary file.  This script can then quickly return
+	        control to mutt while the viewer can take as much time as it
+	        needs to read and render the attachment. 
+	
+	     Using `mutt_bgrun --no-file viewer [viewer options] parameter`
+	
+	        When used with [al]pine, then [al]pine will execute hyperlinks
+	        with the URL as an argument. That argument should therefore not
+	        be interpreted as a file but given to the viewer as is.
+	
+	EXAMPLE
+	     To use qvpview to view MS Office attachments from mutt, add the
+	     following lines to mutt's mailcap file.
+	
+	     application/msword;             mutt_bgrun qvpview %s
+	     application/vnd.ms-excel;       mutt_bgrun qvpview %s
+	     application/vnd.ms-powerpoint;  mutt_bgrun qvpview %s
+	
+	     To use chromium to view URLs from pine, add the
+	     following lines to ~/.mailcap.
+	
+	     text/html; mutt_bgrun --no-file bromium %s
+	
+	EOHELP
+  exit 1
+}
 
-# Check the arguments first.
+# Check the arguments first and display help in case
 
-if [ "$#" -lt "2" ]
-then
-    echo "usage: $prog viewer [viewer options] file" >&2
-    exit 1
-fi
+[ "$#" -lt "2" -o "$1" = "--help" ] && help
 
 # Separate the arguments.
 
